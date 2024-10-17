@@ -11,52 +11,79 @@
         <h1>Sistema de Vacunación</h1>
         <h2>El Salvador</h2>
 
-        <!-- Botones de selección por grupo de edad/género -->
-        <div class="button-group">
-            <button id="btn-ninos" class="btn" onclick="showForm('ninos')">Niños</button>
-            <button id="btn-adultos" class="btn" onclick="showForm('adultos')">Adultos</button>
-            <button id="btn-embarazadas" class="btn" onclick="showForm('embarazadas')">Mujeres Embarazadas</button>
-            <button id="btn-mayores" class="btn" onclick="showForm('mayores')">Mayores de Edad</button>
-        </div>
+        <!-- Formulario para datos personales -->
+        <form id="datosPacienteForm">
+            <div class="form-group">
+                <label for="nombre">Nombre del Paciente:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            <div class="form-group">
+                <label for="fechaNacimiento">Fecha de Nacimiento:</label>
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+            </div>
+            <div class="form-group">
+                <label for="grupoEdad">Grupo de Edad:</label>
+                <select id="grupoEdad" name="grupoEdad" required>
+                    <option value="Niños">Niños</option>
+                    <option value="Adultos">Adultos</option>
+                    <option value="Embarazadas">Mujeres Embarazadas</option>
+                    <option value="Mayores">Mayores de Edad</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="genero">Género:</label>
+                <select id="genero" name="genero" required>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                </select>
+            </div>
+            <div class="button-container">
+                <button type="button" onclick="mostrarVacunas()">Siguiente: Vacunas</button>
+            </div>
+        </form>
 
-        <!-- Formulario dinámico que cambia según el grupo seleccionado -->
-        <div id="vacunacion-form">
-            <!-- Aquí se mostrarán los formularios específicos de cada grupo -->
-        </div>
+        <!-- Botones de selección por grupo de edad/género -->
+        <div id="vacunacion-form"></div>
     </div>
 
     <script>
+        // Mostrar las vacunas según el grupo de edad seleccionado
+        function mostrarVacunas() {
+            const grupoEdad = document.getElementById('grupoEdad').value;
+            showForm(grupoEdad);
+        }
+
         // Datos de vacunas por grupo
         const vacunasPorGrupo = {
-            ninos: [
+            Niños: [
                 { nombre: "BCG (Tuberculosis)", fecha: "al nacer" },
                 { nombre: "Hepatitis B", fecha: "al nacer" },
                 { nombre: "Pentavalente", fecha: "2, 4 y 6 meses" },
                 { nombre: "Polio", fecha: "2, 4 y 6 meses" }
             ],
-            adultos: [
+            Adultos: [
                 { nombre: "Influenza", fecha: "anual" },
                 { nombre: "Tétanos", fecha: "cada 10 años" },
                 { nombre: "Hepatitis B", fecha: "3 dosis" }
             ],
-            embarazadas: [
+            Embarazadas: [
                 { nombre: "Influenza", fecha: "a partir de las 13 semanas" },
                 { nombre: "Tétanos", fecha: "en el tercer trimestre" }
             ],
-            mayores: [
+            Mayores: [
                 { nombre: "Neumococo", fecha: "una dosis" },
                 { nombre: "Influenza", fecha: "anual" }
             ]
         };
 
-        // Función para mostrar las vacunas correspondientes según el grupo seleccionado
+        // Función para mostrar las vacunas correspondientes según el grupo de edad seleccionado
         function showForm(grupo) {
             const container = document.getElementById('vacunacion-form');
             container.innerHTML = ''; // Limpiar el contenido actual
 
             // Crear el formulario de vacunas para el grupo seleccionado
             const vacunas = vacunasPorGrupo[grupo];
-            let formHTML = `<h3>Vacunas para ${grupo.charAt(0).toUpperCase() + grupo.slice(1)}</h3>`;
+            let formHTML = `<h3>Vacunas para ${grupo}</h3>`;
             formHTML += `<form id="vacunaForm" onsubmit="guardarDatos(event)">`; // Agregar formulario
 
             vacunas.forEach(vacuna => {
@@ -80,16 +107,22 @@
         async function guardarDatos(event) {
             event.preventDefault(); // Evitar el comportamiento por defecto del formulario
 
-            const formData = new FormData(event.target); // Obtener datos del formulario
-            const data = Object.fromEntries(formData.entries()); // Convertir FormData a un objeto
+            const formPaciente = new FormData(document.getElementById('datosPacienteForm')); // Datos del paciente
+            const formVacunas = new FormData(event.target); // Datos de las vacunas
+
+            // Combinar los formularios en un solo objeto
+            const datosCompletos = {
+                ...Object.fromEntries(formPaciente.entries()),
+                vacunas: Object.fromEntries(formVacunas.entries())
+            };
 
             // Enviar datos al servidor
-            const response = await fetch('/guardar-vacunas', {
+            const response = await fetch('/guardar-datos', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify(datosCompletos),
             });
 
             if (response.ok) {
