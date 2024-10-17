@@ -57,21 +57,46 @@
             // Crear el formulario de vacunas para el grupo seleccionado
             const vacunas = vacunasPorGrupo[grupo];
             let formHTML = `<h3>Vacunas para ${grupo.charAt(0).toUpperCase() + grupo.slice(1)}</h3>`;
+            formHTML += `<form id="vacunaForm" onsubmit="guardarDatos(event)">`; // Agregar formulario
 
             vacunas.forEach(vacuna => {
                 formHTML += `
                     <div class="form-group">
                         <label>${vacuna.nombre} (Administrar: ${vacuna.fecha})</label>
-                        <input type="date" placeholder="Fecha de Administración" required>
+                        <input type="date" name="${vacuna.nombre}" required>
                     </div>`;
             });
 
             formHTML += `
                 <div class="button-container">
                     <button type="submit">Guardar Datos</button>
-                </div>`;
+                </div>
+                </form>`; // Cerrar formulario
             
             container.innerHTML = formHTML;
+        }
+
+        // Función para guardar los datos
+        async function guardarDatos(event) {
+            event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+
+            const formData = new FormData(event.target); // Obtener datos del formulario
+            const data = Object.fromEntries(formData.entries()); // Convertir FormData a un objeto
+
+            // Enviar datos al servidor
+            const response = await fetch('/guardar-vacunas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Datos guardados correctamente.');
+            } else {
+                alert('Error al guardar los datos.');
+            }
         }
     </script>
 </body>
