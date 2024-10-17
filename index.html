@@ -3,123 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo de Desastres Naturales</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-        #map {
-            height: 400px;
-        }
-        .disaster-types {
-            margin-top: 20px;
-        }
-        .disaster-types button {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            color: white;
-            font-weight: bold;
-        }
-        .disaster-types button.lluvia {
-            background-color: blue;
-        }
-        .disaster-types button.terremoto {
-            background-color: red;
-        }
-        .disaster-types button.derrumbe {
-            background-color: brown;
-        }
-        .disaster-types button.incendio {
-            background-color: orange;
-        }
-        .add-alert {
-            margin-top: 20px;
-        }
-    </style>
+    <title>Sistema de Vacunación - El Salvador</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="form-container">
+        <h1>Sistema de Vacunación</h1>
+        <h2>El Salvador</h2>
 
-<div class="container">
-    <h1 class="text-center mt-4">Monitoreo de Desastres Naturales</h1>
-    <p class="text-center">Información en tiempo real sobre desastres naturales</p>
-
-    <h3>Alertas Recientes</h3>
-    <div class="alert alert-primary">Inundación en Ciudad A - Riesgo: Alto</div>
-    <div class="alert alert-secondary">Terremoto en Ciudad B - Riesgo: Moderado</div>
-
-    <h3>Mapa de Desastres Naturales</h3>
-    <div class="row">
-        <div class="col-md-8">
-            <div id="map"></div>
+        <!-- Botones de selección por grupo de edad/género -->
+        <div class="button-group">
+            <button id="btn-ninos" class="btn" onclick="showForm('ninos')">Niños</button>
+            <button id="btn-adultos" class="btn" onclick="showForm('adultos')">Adultos</button>
+            <button id="btn-embarazadas" class="btn" onclick="showForm('embarazadas')">Mujeres Embarazadas</button>
+            <button id="btn-mayores" class="btn" onclick="showForm('mayores')">Mayores de Edad</button>
         </div>
-        <div class="col-md-4">
-            <h3>Tipos de Desastres</h3>
-            <div class="disaster-types">
-                <button class="lluvia" data-color="blue" data-type="Lluvia Extrema">Lluvia Extrema</button>
-                <button class="terremoto" data-color="red" data-type="Terremoto">Terremoto</button>
-                <button class="derrumbe" data-color="brown" data-type="Derrumbe">Derrumbe</button>
-                <button class="incendio" data-color="orange" data-type="Incendio">Incendio</button>
-            </div>
+
+        <!-- Formulario dinámico que cambia según el grupo seleccionado -->
+        <div id="vacunacion-form">
+            <!-- Aquí se mostrarán los formularios específicos de cada grupo -->
         </div>
     </div>
 
-    <div class="add-alert">
-        <h3>Agregar Nueva Alerta</h3>
-        <form id="alertForm">
-            <label for="alertType">Tipo de Desastre:</label>
-            <select id="alertType" class="form-control">
-                <option value="Lluvia Extrema" data-color="blue">Lluvia Extrema</option>
-                <option value="Terremoto" data-color="red">Terremoto</option>
-                <option value="Derrumbe" data-color="brown">Derrumbe</option>
-                <option value="Incendio" data-color="orange">Incendio</option>
-            </select><br>
+    <script>
+        // Datos de vacunas por grupo
+        const vacunasPorGrupo = {
+            ninos: [
+                { nombre: "BCG (Tuberculosis)", fecha: "al nacer" },
+                { nombre: "Hepatitis B", fecha: "al nacer" },
+                { nombre: "Pentavalente", fecha: "2, 4 y 6 meses" },
+                { nombre: "Polio", fecha: "2, 4 y 6 meses" }
+            ],
+            adultos: [
+                { nombre: "Influenza", fecha: "anual" },
+                { nombre: "Tétanos", fecha: "cada 10 años" },
+                { nombre: "Hepatitis B", fecha: "3 dosis" }
+            ],
+            embarazadas: [
+                { nombre: "Influenza", fecha: "a partir de las 13 semanas" },
+                { nombre: "Tétanos", fecha: "en el tercer trimestre" }
+            ],
+            mayores: [
+                { nombre: "Neumococo", fecha: "una dosis" },
+                { nombre: "Influenza", fecha: "anual" }
+            ]
+        };
 
-            <button type="button" id="sendEmailBtn" class="btn btn-success">Enviar Notificación por Correo</button>
-        </form>
-    </div>
-</div>
+        // Función para mostrar las vacunas correspondientes según el grupo seleccionado
+        function showForm(grupo) {
+            const container = document.getElementById('vacunacion-form');
+            container.innerHTML = ''; // Limpiar el contenido actual
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<script>
-    var selectedType = "Lluvia Extrema";
-    var selectedColor = "blue";
-    var map = L.map('map').setView([13.692940, -89.218191], 8); // Focalizado en El Salvador
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-    }).addTo(map);
+            // Crear el formulario de vacunas para el grupo seleccionado
+            const vacunas = vacunasPorGrupo[grupo];
+            let formHTML = `<h3>Vacunas para ${grupo.charAt(0).toUpperCase() + grupo.slice(1)}</h3>`;
 
-    // Cambiar tipo de desastre y color al hacer clic en los botones de desastre
-    document.querySelectorAll('.disaster-types button').forEach(function (button) {
-        button.addEventListener('click', function () {
-            selectedType = this.getAttribute('data-type');
-            selectedColor = this.getAttribute('data-color');
-        });
-    });
+            vacunas.forEach(vacuna => {
+                formHTML += `
+                    <div class="form-group">
+                        <label>${vacuna.nombre} (Administrar: ${vacuna.fecha})</label>
+                        <input type="date" placeholder="Fecha de Administración" required>
+                    </div>`;
+            });
 
-    // Agregar marcador en el mapa al hacer clic
-    map.on('click', function (e) {
-        var lat = e.latlng.lat;
-        var lon = e.latlng.lng;
-        var marker = L.circleMarker([lat, lon], {
-            color: selectedColor,
-            radius: 10
-        }).addTo(map);
-        marker.bindPopup("<b>" + selectedType + "</b>").openPopup();
-    });
-
-    // Función para enviar correo de notificación
-    document.getElementById('sendEmailBtn').addEventListener('click', function () {
-        sendEmail();
-    });
-
-    // Enviar el correo (esto necesita ser manejado por el servidor o backend)
-    function sendEmail() {
-        // Aquí puedes realizar el envío del correo mediante un backend
-        alert("Se ha enviado la notificación por correo a los suscriptores.");
-    }
-</script>
-
+            formHTML += `
+                <div class="button-container">
+                    <button type="submit">Guardar Datos</button>
+                </div>`;
+            
+            container.innerHTML = formHTML;
+        }
+    </script>
 </body>
 </html>
