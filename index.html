@@ -14,39 +14,112 @@
         <!-- Formulario para datos personales -->
         <form id="datosPacienteForm">
             <div class="form-group">
-                <label for="nombre">Nombre del Paciente:</label>
-                <input type="text" id="nombre" name="nombre" required>
+                <label for="primerNombre">Primer Nombre:</label>
+                <input type="text" id="primerNombre" name="primerNombre" required>
+            </div>
+            <div class="form-group">
+                <label for="segundoNombre">Segundo Nombre:</label>
+                <input type="text" id="segundoNombre" name="segundoNombre">
+            </div>
+            <div class="form-group">
+                <label for="primerApellido">Primer Apellido:</label>
+                <input type="text" id="primerApellido" name="primerApellido" required>
+            </div>
+            <div class="form-group">
+                <label for="segundoApellido">Segundo Apellido:</label>
+                <input type="text" id="segundoApellido" name="segundoApellido">
             </div>
             <div class="form-group">
                 <label for="fechaNacimiento">Fecha de Nacimiento:</label>
                 <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
             </div>
             <div class="form-group">
+                <label for="pais">País:</label>
+                <select id="pais" name="pais" required>
+                    <option value="El Salvador">El Salvador</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="departamento">Departamento:</label>
+                <select id="departamento" name="departamento" onchange="actualizarMunicipios()" required>
+                    <option value="">Seleccione un departamento</option>
+                    <option value="San Salvador">San Salvador</option>
+                    <option value="La Libertad">La Libertad</option>
+                    <option value="Santa Ana">Santa Ana</option>
+                    <option value="San Miguel">San Miguel</option>
+                    <!-- Agregar los 14 departamentos -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="municipio">Municipio:</label>
+                <select id="municipio" name="municipio" required>
+                    <option value="">Seleccione un municipio</option>
+                    <!-- Municipios actualizados dinámicamente -->
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="grupoEdad">Grupo de Edad:</label>
-                <select id="grupoEdad" name="grupoEdad" required>
+                <select id="grupoEdad" name="grupoEdad" onchange="mostrarCamposPadres()" required>
                     <option value="Niños">Niños</option>
                     <option value="Adultos">Adultos</option>
                     <option value="Embarazadas">Mujeres Embarazadas</option>
                     <option value="Mayores">Mayores de Edad</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="genero">Género:</label>
-                <select id="genero" name="genero" required>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                </select>
+            <div class="form-group" id="padresSection" style="display:none;">
+                <label for="nombrePadre">Nombre del Padre:</label>
+                <input type="text" id="nombrePadre" name="nombrePadre">
+                <label for="nombreMadre">Nombre de la Madre:</label>
+                <input type="text" id="nombreMadre" name="nombreMadre">
             </div>
             <div class="button-container">
                 <button type="button" onclick="mostrarVacunas()">Siguiente: Vacunas</button>
             </div>
         </form>
 
-        <!-- Botones de selección por grupo de edad/género -->
+        <!-- Formulario de vacunación -->
         <div id="vacunacion-form"></div>
     </div>
 
     <script>
+        // Mostrar los campos de los padres si el grupo de edad es "Niños"
+        function mostrarCamposPadres() {
+            const grupoEdad = document.getElementById('grupoEdad').value;
+            const padresSection = document.getElementById('padresSection');
+            if (grupoEdad === 'Niños') {
+                padresSection.style.display = 'block';
+            } else {
+                padresSection.style.display = 'none';
+            }
+        }
+
+        // Actualizar los municipios según el departamento seleccionado
+        function actualizarMunicipios() {
+            const departamento = document.getElementById('departamento').value;
+            const municipioSelect = document.getElementById('municipio');
+            municipioSelect.innerHTML = ''; // Limpiar opciones anteriores
+
+            let municipios = [];
+
+            // Definir municipios según el departamento
+            if (departamento === 'San Salvador') {
+                municipios = ['San Salvador', 'Soyapango', 'Mejicanos', 'Ilopango'];
+            } else if (departamento === 'La Libertad') {
+                municipios = ['Santa Tecla', 'Antiguo Cuscatlán', 'Colón', 'Ciudad Arce'];
+            } else if (departamento === 'Santa Ana') {
+                municipios = ['Santa Ana', 'Metapán', 'Chalchuapa'];
+            } else if (departamento === 'San Miguel') {
+                municipios = ['San Miguel', 'Chinameca', 'Ciudad Barrios'];
+            }
+            // Agregar municipios
+            municipios.forEach(municipio => {
+                const option = document.createElement('option');
+                option.value = municipio;
+                option.textContent = municipio;
+                municipioSelect.appendChild(option);
+            });
+        }
+
         // Mostrar las vacunas según el grupo de edad seleccionado
         function mostrarVacunas() {
             const grupoEdad = document.getElementById('grupoEdad').value;
